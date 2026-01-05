@@ -6,6 +6,7 @@ from urllib.request import urlopen
 import sqlite3
                                                                                                                                        
 app = Flask(__name__)
+
 @app.route("/contact/")
 def MaPremiereAPI():
     return render_template("contact.html")
@@ -32,20 +33,16 @@ def hello_world():
   
 @app.route("/commits-data/")
 def commits_data():
-    # GitHub peut refuser si le header User-Agent est absent
     req = Request(
         "https://api.github.com/repos/OpenRSI/5MCSI_Metriques/commits?per_page=100",
         headers={"User-Agent": "Mozilla/5.0"}
     )
     response = urlopen(req)
-    raw = response.read()
-    commits_json = json.loads(raw.decode("utf-8"))
+    commits_json = json.loads(response.read().decode("utf-8"))
 
-    # Compter le nombre de commits par minute (0..59)
     buckets = {m: 0 for m in range(60)}
 
     for c in commits_json:
-        # Chemin réel: commit -> author -> date
         date_str = (((c.get("commit") or {}).get("author") or {}).get("date"))
         if not date_str:
             continue
@@ -55,7 +52,7 @@ def commits_data():
 
     results = [{"minute": m, "count": buckets[m]} for m in range(60)]
     return jsonify(results=results)
-  
+
 @app.route("/commits/")
 def commits():
     return render_template("commits.html")
