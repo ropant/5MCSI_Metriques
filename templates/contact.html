@@ -1,0 +1,144 @@
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Contact</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #f6f7fb;
+      }
+      .container {
+        max-width: 850px;
+        margin: 50px auto;
+        background: white;
+        padding: 32px;
+        border-radius: 14px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+      }
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 12px;
+      }
+      h2 { margin: 0 0 6px 0; }
+      .subtitle {
+        margin: 0 0 20px 0;
+        color: #6b7280;
+        font-size: 14px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      .field { margin-bottom: 14px; }
+      label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 600;
+        color: #111827;
+      }
+      input, textarea {
+        width: 100%;
+        padding: 11px;
+        border: 1px solid #d9d9e3;
+        border-radius: 10px;
+        font-size: 14px;
+        outline: none;
+      }
+      input:focus, textarea:focus {
+        border-color: #111827;
+      }
+      textarea { min-height: 140px; resize: vertical; }
+      .actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-top: 10px;
+      }
+      button {
+        border: 0;
+        border-radius: 10px;
+        padding: 11px 16px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .btn-primary { background: #111827; color: white; }
+      .btn-secondary { background: #e5e7eb; color: #111827; }
+      .note {
+        margin-top: 12px;
+        font-size: 12px;
+        color: #6b7280;
+      }
+      .success {
+        background: #ecfeff;
+        border: 1px solid #a5f3fc;
+        padding: 12px;
+        border-radius: 10px;
+        margin-bottom: 16px;
+        color: #0f172a;
+      }
+      .badge {
+        font-size: 12px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: #111827;
+        color: #fff;
+        white-space: nowrap;
+      }
+      @media (max-width: 700px) {
+        .grid { grid-template-columns: 1fr; }
+        .header { flex-direction: column; align-items: flex-start; }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="header">
+        <div>
+          <h2>Page de contact</h2>
+          <p class="subtitle">Laissez votre nom, votre prénom et un message. (Exercice design)</p>
+        </div>
+        <div class="badge">Projet Métriques</div>
+      </div>
+
+      {% if submitted %}
+        <div class="success">
+          <strong>Message envoyé (simulation).</strong><br />
+          Merci {{ prenom }} {{ nom }} — aucune donnée n’a été enregistrée.
+        </div>
+      {% endif %}
+
+      <form method="POST">
+        <div class="grid">
+          <div class="field">
+            <label for="prenom">Prénom</label>
+            <input id="prenom" name="prenom" type="text" placeholder="Votre prénom" required />
+          </div>
+
+          <div class="field">
+            <label for="nom">Nom</label>
+            <input id="nom" name="nom" type="text" placeholder="Votre nom" required />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="message">Message</label>
+          <textarea id="message" name="message" placeholder="Votre message..." required></textarea>
+        </div>
+
+        <div class="actions">
+          <button class="btn-primary" type="submit">Envoyer</button>
+          <button class="btn-secondary" type="reset">Effacer</button>
+        </div>
+
+        <div class="note">
+          Astuce : la validation se fait côté navigateur. Le backend n’enregistre rien, conformément à l’énoncé.
+        </div>
+      </form>
+    </div>
+  </body>
+</html>
