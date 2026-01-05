@@ -30,31 +30,50 @@ def mongraphique():
 def hello_world():
     return render_template('hello.html')
   
+from urllib.error import HTTPError, URLError
+
 @app.route("/commits-data/")
 def commits_data():
-    # GitHub peut refuser si le header User-Agent est absent
-    req = Request(
-        "https://api.github.com/repos/OpenRSI/5MCSI_Metriques/commits?per_page=100",
-        headers={"User-Agent": "Mozilla/5.0"}
-    )
-    response = urlopen(req)
-    raw = response.read()
-    commits_json = json.loads(raw.decode("utf-8"))
+    try:
+        req = Request(
+            "https://api.github.com/repos/OpenRSI/5MCSI_Metriques/commits?per_page=100",
+            headers={
+                "User-Agent": "Mozilla/5.0",
+                "Accept": "application/vnd.github+json"
+            }
+        )
+        response = urlopen(req, timeout=10)
+        payload = response.read().decode("utf-8")
+        commits_json = json.loads(payload)
 
-    # Compter le nombre de commits par minute (0..59)
-    buckets = {m: 0 for m in range(60)}
+        # Si GitHub renvoie un objet d'erreur (dict) au lieu d'une liste
+        if isinstance(commits_json, dict):
+            return jsonify(
+                error="GitHub API a renvoyé une erreur",
+                details=commits_json
+            ), 502
 
-    for c in commits_json:
-        # Chemin réel: commit -> author -> date
-        date_str = (((c.get("commit") or {}).get("author") or {}).get("date"))
-        if not date_str:
-            continue
+        # Compter le nombre de commits par minute (0..59)
+        buckets = {m: 0 for m in range(60)}
 
-        dt = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%SZ")
-        buckets[dt.minute] += 1
+        for c in commits_json:
+            date_str = (((c.get("commit") or {}).get("author") or {}).get("date"))
+            if not date_str:
+                continue
 
-    results = [{"minute": m, "count": buckets[m]} for m in range(60)]
-    return jsonify(results=results)
+            dt = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%SZ")
+            buckets[dt.minute] += 1
+
+        results = [{"minute": m, "count": buckets[m]} for m in range(60)]
+        return jsonify(results=results)
+
+    except HTTPError as e:
+        return jsonify(error="HTTPError GitHub", code=e.code, reason=str(e)), 502
+    except URLError as e:
+        return jsonify(error="URLError (réseau)", reason=str(e.reason)), 502
+    except Exception as e:
+        return jsonify(error="Erreur interne Python", details=str(e)), 500
+
   
 @app.route("/commits/")
 def commits():
